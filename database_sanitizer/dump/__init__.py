@@ -16,7 +16,7 @@ urlparse.uses_netloc.append("postgres")
 urlparse.uses_netloc.append("postgresql")
 
 
-def run(url, output):
+def run(url, output, config):
     """
     Extracts database dump from given database URL and outputs sanitized
     copy of it into given stream.
@@ -27,11 +27,15 @@ def run(url, output):
     :param output: Stream where sanitized copy of the database dump will be
                    written into.
     :type output: file
+
+    :param config: Optional sanitizer configuration to be used for sanitation
+                   of the values stored in the database.
+    :type config: database_sanitizer.config.Configuration|None
     """
     parsed_url = urlparse.urlparse(url)
     db_module_path = SUPPORTED_DATABASE_MODULES.get(parsed_url.scheme)
     if not db_module_path:
         raise ValueError("Unsupported database scheme: '%s'" % (parsed_url.scheme,))
     db_module = importlib.import_module(db_module_path)
-    for line in db_module.sanitize(url=parsed_url):
+    for line in db_module.sanitize(url=parsed_url, config=config):
         output.write(line + "\n")

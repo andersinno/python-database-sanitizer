@@ -14,7 +14,7 @@ COPY_LINE_PATTERN = re.compile(
 )
 
 
-def sanitize(url):
+def sanitize(url, config):
     """
     Obtains dump of an Postgres database by executing `pg_dump` command and
     sanitizes it's output.
@@ -22,6 +22,10 @@ def sanitize(url):
     :param url: URL to the database which is going to be sanitized, parsed by
                 Python's URL parser.
     :type url: six.moves.urllib.parse.ParseResult
+
+    :param config: Optional sanitizer configuration to be used for sanitation
+                   of the values stored in the database.
+    :type config: database_sanitizer.config.Configuration|None
     """
     if url.scheme not in ("postgres", "postgresql"):
         raise ValueError("Unsupported database type: '%s'" % (url.scheme,))
@@ -66,7 +70,12 @@ def sanitize(url):
                 raise ValueError("Mismatch between column names and values.")
 
             for index, value in enumerate(unsanitized_values):
-                # TODO: Perform the actual sanitation here.
+                if config:
+                    value = config.sanitize(
+                        table_name=current_table,
+                        column_name=current_table_columns[index],
+                        value=value,
+                    )
                 sanitized_values.append(value)
 
             # Convert sanitized values back into column values.
