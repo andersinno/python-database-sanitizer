@@ -17,6 +17,7 @@ setup(
         "database_sanitizer.utils",
     ],
     install_requires=[
+        "PyYAML>=3.12",
         "six>=1.11.0",
     ],
     platforms=["OS Independent"],
