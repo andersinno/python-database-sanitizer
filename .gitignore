@@ -1,7 +1,10 @@
 *.pyc
+*.egg
+*.egg-info/
 __pycache__
 /.coverage
 /.idea
 /.pytest_cache
 /coverage.xml
+/htmlcov
 /venv

@@ -1,8 +1,12 @@
+sudo: false
 language: python
-python: 3.4
 cache: pip
-
-install: pip install pytest pytest-cov
-script: py.test -vvv --cov database_sanitizer --cov-report=term-missing
-after_success: curl -s https://codecov.io/bash | bash
+python:
+  - "3.4"
+install:
+  - pip install -r requirements-test.txt
+script:
+  - py.test -vvv --cov database_sanitizer --cov-report=term-missing
+after_success:
+  - curl -s https://codecov.io/bash | bash
 
