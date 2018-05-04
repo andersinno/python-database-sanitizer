@@ -5,9 +5,13 @@ from __future__ import unicode_literals
 import pytest
 
 from collections import namedtuple
-from unittest import mock
 
 from ..config import Configuration, ConfigurationError
+
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 
 def test_load_config_data_must_be_dict():

@@ -10,6 +10,7 @@ https://www.postgresql.org/docs/9.2/static/sql-copy.html
 
 from __future__ import unicode_literals
 
+import six
 import string
 
 
@@ -72,7 +73,7 @@ def decode_copy_value(value):
                     end_index < length and\
                     value[end_index] in string.hexdigits:
                 end_index += 1
-            unescaped = chr(int(value[index:end_index], 16))
+            unescaped = six.unichr(int(value[index:end_index], 16))
             index = end_index
         elif c in string.octdigits:
             end_index = index
@@ -80,7 +81,7 @@ def decode_copy_value(value):
                     end_index < length and\
                     value[end_index] in string.octdigits:
                 end_index += 1
-            unescaped = chr(int(value[(index - 1):end_index], 8))
+            unescaped = six.unichr(int(value[(index - 1):end_index], 8))
             index = end_index
         else:
             raise ValueError("Unrecognized escape sequence encountered: %r" % (c,))
