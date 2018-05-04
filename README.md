@@ -54,11 +54,11 @@ config:
   addons:
     - some.other.package
     - yet.another.package
-  strategy:
-    user:
-      first_name: name.first_name
-      last_name: name.last_name
-      secret_key: string.empty
+strategy:
+  user:
+    first_name: name.first_name
+    last_name: name.last_name
+    secret_key: string.empty
 ```
 
 In the example configuration above, there are first listed two "addon
