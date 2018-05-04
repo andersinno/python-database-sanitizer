@@ -7,10 +7,14 @@ import six
 
 from collections import namedtuple
 from six.moves.urllib import parse as urlparse
-from unittest import mock
 
 from ..config import Configuration
 from ..dump.postgres import parse_column_names, parse_values, sanitize
+
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 
 MOCK_PG_DUMP_OUTPUT = b"""
