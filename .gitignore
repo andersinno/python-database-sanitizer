@@ -3,8 +3,11 @@
 *.egg-info/
 __pycache__
 /.coverage
+/.eggs
 /.idea
 /.pytest_cache
+/build
 /coverage.xml
+/dist
 /htmlcov
 /venv
