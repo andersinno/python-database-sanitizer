@@ -2,8 +2,8 @@
 
 from __future__ import unicode_literals
 
+import io
 import pytest
-import six
 
 from collections import namedtuple
 from six.moves.urllib import parse as urlparse
@@ -50,7 +50,7 @@ COPY "public"."test" ("id", "created_at", "notes") FROM stdin;
 def create_mock_popen(mock_pg_dump_output):
     def mock_popen(cmd_args, stdout):
         mock_pipe_type = namedtuple("mock_pipe", ("stdout",))
-        mock_stdout = six.BytesIO(mock_pg_dump_output)
+        mock_stdout = io.BytesIO(mock_pg_dump_output)
         return mock_pipe_type(stdout=mock_stdout)
     return mock_popen
 
