@@ -10,6 +10,7 @@ from six.moves.urllib import parse as urlparse
 
 from ..config import Configuration
 from ..dump.postgres import parse_column_names, parse_values, sanitize
+from ..dump import postgres as dump_postgres
 
 try:
     from unittest import mock
@@ -71,10 +72,13 @@ def test_sanitize():
 def test_sanitizer_invalid_input():
     url = urlparse.urlparse("postgres://localhost/test")
 
+    config = Configuration()
+    config.sanitizers["test.notes"] = lambda value: "Sanitized"
+
     with mock.patch("subprocess.Popen", side_effect=create_mock_popen(INVALID_MOCK_PG_DUMP_OUTPUT)):
         with pytest.raises(ValueError):
             # Yes, we need the list() function there to eat the yields.
-            list(sanitize(url, None))
+            list(sanitize(url, config))
 
 
 def test_sanitizer_invalid_scheme():
@@ -106,3 +110,18 @@ def test_parse_column_names(text, expected_column_names):
 )
 def test_parse_values(text, expected_values):
     assert parse_values(text) == expected_values
+
+
+@pytest.mark.parametrize('data_label', ['ok', 'invalid'])
+def test_no_config_optimization(data_label):
+    data = {
+        'ok': MOCK_PG_DUMP_OUTPUT,
+        'invalid': INVALID_MOCK_PG_DUMP_OUTPUT,
+    }[data_label]
+
+    url = urlparse.urlparse("postgres://localhost/test")
+    with mock.patch("subprocess.Popen", side_effect=create_mock_popen(data)):
+        with mock.patch.object(dump_postgres, 'parse_values') as parser_mock:
+            expected_output = data.decode('utf-8').splitlines()
+            assert list(sanitize(url, None)) == expected_output
+            assert parser_mock.call_count == 0, "Parser should not be called"

@@ -275,6 +275,22 @@ class Configuration(object):
             type(callback),
         ))
 
+    def get_sanitizer_for(self, table_name, column_name):
+        """
+        Get sanitizer for given table and column name.
+
+        :param table_name: Name of the database table.
+        :type table_name: str
+
+        :param column_name: Name of the database column.
+        :type column_name: str
+
+        :return: Sanitizer function or None if nothing is configured
+        :rtype: Optional[Callable[[Optional[str]], Optional[str]]]
+        """
+        sanitizer_key = "%s.%s" % (table_name, column_name)
+        return self.sanitizers.get(sanitizer_key)
+
     def sanitize(self, table_name, column_name, value):
         """
         Sanitizes given value extracted from the database according to the
@@ -298,6 +314,5 @@ class Configuration(object):
         :return: Sanitized version of the given value.
         :rtype: str|None
         """
-        sanitizer_key = "%s.%s" % (table_name, column_name)
-        sanitizer_callback = self.sanitizers.get(sanitizer_key)
+        sanitizer_callback = self.get_sanitizer_for(table_name, column_name)
         return sanitizer_callback(value) if sanitizer_callback else value
