@@ -11,6 +11,7 @@ from six.moves.urllib import parse as urlparse
 from ..config import Configuration
 from ..dump.postgres import parse_column_names, parse_values, sanitize
 from ..dump import postgres as dump_postgres
+from ..utils.postgres import decode_copy_value
 
 try:
     from unittest import mock
@@ -112,16 +113,39 @@ def test_parse_values(text, expected_values):
     assert parse_values(text) == expected_values
 
 
+@pytest.mark.parametrize('config_type', [
+    'no-config', 'empty-config', 'single-column-config'])
 @pytest.mark.parametrize('data_label', ['ok', 'invalid'])
-def test_no_config_optimization(data_label):
+def test_optimizations(config_type, data_label):
+    if config_type == 'no-config':
+        config = None
+        decoder_call_count = 0
+    else:
+        config = Configuration()
+        if config_type == 'empty-config':
+            decoder_call_count = 0
+        else:
+            assert config_type == 'single-column-config'
+            config.sanitizers["test.notes"] = (lambda x: x)
+            decoder_call_count = 3  # Number of rows in test table
+
     data = {
         'ok': MOCK_PG_DUMP_OUTPUT,
         'invalid': INVALID_MOCK_PG_DUMP_OUTPUT,
     }[data_label]
 
+    should_raise = (
+        config_type == 'single-column-config'
+        and data_label == 'invalid')
+
     url = urlparse.urlparse("postgres://localhost/test")
     with mock.patch("subprocess.Popen", side_effect=create_mock_popen(data)):
-        with mock.patch.object(dump_postgres, 'parse_values') as parser_mock:
-            expected_output = data.decode('utf-8').splitlines()
-            assert list(sanitize(url, None)) == expected_output
-            assert parser_mock.call_count == 0, "Parser should not be called"
+        with mock.patch.object(dump_postgres, 'decode_copy_value') as decoder:
+            decoder.side_effect = decode_copy_value
+            if should_raise:
+                with pytest.raises(ValueError):
+                    list(sanitize(url, config))
+            else:
+                expected_output = data.decode('utf-8').splitlines()
+                assert list(sanitize(url, config)) == expected_output
+                assert decoder.call_count == decoder_call_count
