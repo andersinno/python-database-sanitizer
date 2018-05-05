@@ -6,16 +6,55 @@ and decoding values in the custom format used by Postgres.
 Documentation about copy command and the text format used by it can be found
 from:
 https://www.postgresql.org/docs/9.2/static/sql-copy.html
+
+For decoding we use a regular expression to find the escape sequences
+and invoke `unescape_single_character` function for each occurence.
+Allowed escape sequences are precalculated into `DECODE_MAP` to make the
+lookups faster.
+
+For encoding we use a string translation table `ENCODE_TRANSLATE_TABLE`,
+which maps the "forbidden" characters to escape sequences.  This is used
+with `str.translate`, which is very fast way to escape characters.
 """
 
 from __future__ import unicode_literals
 
-import six
+import itertools
+import re
 import string
 
+import six
 
 #: Representation of NULL value in Postgres COPY statement.
 POSTGRES_COPY_NULL_VALUE = "\\N"
+
+ENCODE_MAP = {
+    '\\': '\\\\',
+    '\b': '\\b',
+    '\f': '\\f',
+    '\n': '\\n',
+    '\r': '\\r',
+    '\t': '\\t',
+    '\v': '\\v',
+}
+
+ENCODE_TRANSLATE_TABLE = [
+    ENCODE_MAP.get(six.unichr(n), six.unichr(n))
+    for n in range(256)
+]
+
+DECODE_REGEX = re.compile(r"""
+\\                 # a backslash
+(?:                # followed by one of these (in non-capturing parenthesis):
+    [0-7]{1,3}         # 1, 2 or 3 octal digits
+    |                  # or
+    x[0-9a-fA-F]{1,2}  # 'x' followed by 1 or 2 hexadecimal digits
+    |                  # or
+    .                  # any character
+    |                  # or
+    \Z                 # end of string
+)
+""", re.VERBOSE)
 
 
 def decode_copy_value(value):
@@ -33,65 +72,34 @@ def decode_copy_value(value):
     if value == POSTGRES_COPY_NULL_VALUE:
         return None
 
-    index = 0
-    length = len(value)
-    result = None
+    # If there is no backslash present, there's nothing to decode.
+    #
+    # This early return provides a little speed-up, because it's very
+    # common to not have anything to decode and then simple search for
+    # backslash is faster than the regex sub below.
+    if '\\' not in value:
+        return value
 
-    while index < length:
-        c = value[index]
+    return DECODE_REGEX.sub(unescape_single_character, value)
 
-        if c != "\\":
-            if result is not None:
-                result += c
-            index += 1
-            continue
 
-        if result is None:
-            result = value[:index]
-        index += 1
-        if index >= length:
+def unescape_single_character(match):
+    """
+    Unescape a single escape sequence found by regular expression.
+
+    :param match: Regular expression match object
+    :rtype: str
+    :raises: ValueError if the escape sequence is invalid
+    """
+    try:
+        return DECODE_MAP[match.group(0)]
+    except KeyError:
+        value = match.group(0)
+        if value == '\\':
             raise ValueError("Unterminated escape sequence encountered")
-        c = value[index]
-        index += 1
-        if c == "\\":
-            unescaped = c
-        elif c == "b":
-            unescaped = "\b"
-        elif c == "f":
-            unescaped = "\f"
-        elif c == "n":
-            unescaped = "\n"
-        elif c == "r":
-            unescaped = "\r"
-        elif c == "t":
-            unescaped = "\t"
-        elif c == "v":
-            unescaped = "\v"
-        elif c == "x":
-            end_index = index
-            while end_index - index < 2 and\
-                    end_index < length and\
-                    value[end_index] in string.hexdigits:
-                end_index += 1
-            unescaped = six.unichr(int(value[index:end_index], 16))
-            index = end_index
-        elif c in string.octdigits:
-            end_index = index
-            while end_index - index < 2 and\
-                    end_index < length and\
-                    value[end_index] in string.octdigits:
-                end_index += 1
-            unescaped = six.unichr(int(value[(index - 1):end_index], 8))
-            index = end_index
-        else:
-            raise ValueError("Unrecognized escape sequence encountered: %r" % (c,))
-        result += unescaped
 
-    if result is not None:
-        return result
-
-    # Value didn't contain any escaped characters and can be used as is.
-    return value
+        raise ValueError(
+            "Unrecognized escape sequence encountered: {}".format(value))
 
 
 def encode_copy_value(value):
@@ -108,38 +116,31 @@ def encode_copy_value(value):
     if value is None:
         return POSTGRES_COPY_NULL_VALUE
 
-    index = 0
-    length = len(value)
-    result = None
+    return value.translate(ENCODE_TRANSLATE_TABLE)
 
-    while index < length:
-        c = value[index]
-        index += 1
-        if c == "\\":
-            escaped = "\\\\"
-        elif c == "\b":
-            escaped = "\\b"
-        elif c == "\f":
-            escaped = "\\f"
-        elif c == "\n":
-            escaped = "\\n"
-        elif c == "\r":
-            escaped = "\\r"
-        elif c == "\t":
-            escaped = "\\t"
-        elif c == "\v":
-            escaped = "\\v"
-        else:
-            if result is not None:
-                result += c
-            continue
-        if result is None:
-            result = value[:(index - 1)]
-        result += escaped
 
-    if result is not None:
-        return result
+def _generate_decode_map():
+    # Initialize the map by inverting the encode map
+    decode_map = {
+        encoded_char: char
+        for (char, encoded_char) in ENCODE_MAP.items()
+    }
 
-    # Given value didn't contain anything which needs to be escaped and can be
-    # used as is.
-    return value
+    # Add entries for 1-3 octal digits and 1-2 hexadecimal digits
+    digit_encode_params = [
+        # (base, prefix, lengths, digit_chars)
+        (8, '\\', [1, 2, 3], '01234567'),
+        (16, '\\x', [1, 2], '0123456789abcdefABCDEF')
+    ]
+    for (base, prefix, lengths, digit_chars) in digit_encode_params:
+        for length in lengths:
+            for digits in itertools.product(digit_chars, repeat=length):
+                digit_string = ''.join(digits)
+                value = int(digit_string, base=base)
+                char = six.unichr(value)
+                decode_map[prefix + digit_string] = char
+
+    return decode_map
+
+
+DECODE_MAP = _generate_decode_map()
