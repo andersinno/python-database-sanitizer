@@ -47,7 +47,7 @@ def sanitize(url, config):
         stdout=subprocess.PIPE,
     )
 
-    sanitize_values = None
+    sanitize_value_line = None
     current_table = None
     current_table_columns = None
 
@@ -64,21 +64,11 @@ def sanitize(url, config):
                 yield "\\."
                 continue
 
-            if not sanitize_values:
+            if not sanitize_value_line:
                 yield line
                 continue
 
-            # Otherwise we have a line containing column values. It's time to
-            # parse and sanitize them.
-            unsanitized_values = parse_values(line)
-
-            if len(unsanitized_values) != len(current_table_columns):
-                raise ValueError("Mismatch between column names and values.")
-
-            sanitized_values = sanitize_values(unsanitized_values)
-
-            # Convert sanitized values back into column values.
-            yield "\t".join(encode_copy_value(value) for value in sanitized_values)
+            yield sanitize_value_line(line)
             continue
 
         # Is the line beginning of `COPY` statement?
@@ -90,35 +80,41 @@ def sanitize(url, config):
         current_table = copy_line_match.group("table")
         current_table_columns = parse_column_names(copy_line_match.group("columns"))
 
-        sanitize_values = get_sanitizer(
+        sanitize_value_line = get_value_line_sanitizer(
             config, current_table, current_table_columns)
 
         yield line
 
 
-def get_sanitizer(config, table, columns):
+def get_value_line_sanitizer(config, table, columns):
     if not config:
         return None
 
-    sanitizers = [
-        config.get_sanitizer_for(table, field)
-        for field in columns
-    ]
+    def get_sanitizer(column):
+        sanitizer = config.get_sanitizer_for(table, column)
 
-    if not any(sanitizers):
+        if not sanitizer:
+            return _identity
+
+        def decode_sanitize_encode(value):
+            return encode_copy_value(sanitizer(decode_copy_value(value)))
+
+        return decode_sanitize_encode
+
+    sanitizers = [get_sanitizer(column) for column in columns]
+
+    if all(x is _identity for x in sanitizers):
         return None
 
-    sanitizers_or_identities = [
-        (sanitizer or _identity) for sanitizer in sanitizers
-    ]
-
-    def sanitize_values(values):
-        return [
+    def sanitize_line(line):
+        values = line.split('\t')
+        if len(values) != len(columns):
+            raise ValueError("Mismatch between column names and values.")
+        return '\t'.join(
             sanitizer(value)
-            for (sanitizer, value) in zip(sanitizers_or_identities, values)
-        ]
+            for (sanitizer, value) in zip(sanitizers, values))
 
-    return sanitize_values
+    return sanitize_line
 
 
 def _identity(x):
