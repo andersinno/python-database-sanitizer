@@ -1,5 +1,11 @@
-# Database sanitation tool [![travis][travis-image]][travis-url] [![codecov][codecov-image]][codecov-url]
+# Database sanitation tool
 
+[![pypi][pypi-image]][pypi-url]
+[![travis][travis-image]][travis-url]
+[![codecov][codecov-image]][codecov-url]
+
+[pypi-image]: https://badge.fury.io/py/database-sanitizer.svg
+[pypi-url]: https://pypi.org/project/database-sanitizer/
 [travis-image]: https://travis-ci.org/andersinno/python-database-sanitizer.svg?branch=master
 [travis-url]: https://travis-ci.org/andersinno/python-database-sanitizer
 [codecov-image]: https://codecov.io/gh/andersinno/python-database-sanitizer/branch/master/graph/badge.svg
@@ -7,12 +13,29 @@
 
 `database-sanitizer` is a tool which retrieves an database dump from
 relational database and performs sanitation on the retrieved data
-according to rules defined in a configuration file. Currently only
-supported database backend is [PostgreSQL], but support for [MySQL] is
-planned to be added in the future.
+according to rules defined in a configuration file. Currently the
+sanitation tool supports both [PostgreSQL] and [MySQL] databases.
 
 [PostgreSQL]: https://postgres.org
 [MySQL]: https://mysql.com
+
+## Installation
+
+`database-sanitizer` can be installed from [PyPI] with [pip] like this:
+
+```bash
+$ pip install database-sanitizer
+```
+
+If you are using MySQL, you need to install the package like this
+instead, so that additional requirements are included:
+
+```bash
+$ pip install database-sanitizer[MySQL]
+```
+
+[PyPI]: https://pypi.org
+[pip]: https://pip.pypa.io/en/stable/
 
 ## Usage
 
