@@ -8,12 +8,14 @@ from six.moves.urllib import parse as urlparse
 
 
 SUPPORTED_DATABASE_MODULES = {
+    "mysql": "database_sanitizer.dump.mysql",
     "postgres": "database_sanitizer.dump.postgres",
     "postgresql": "database_sanitizer.dump.postgres",
 }
 
 
 # Register supported database schemes.
+urlparse.uses_netloc.append("mysql")
 urlparse.uses_netloc.append("postgres")
 urlparse.uses_netloc.append("postgresql")
 
