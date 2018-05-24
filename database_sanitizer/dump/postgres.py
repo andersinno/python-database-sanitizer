@@ -29,7 +29,7 @@ def sanitize(url, config):
                    of the values stored in the database.
     :type config: database_sanitizer.config.Configuration|None
     """
-    if url.scheme not in ("postgres", "postgresql"):
+    if url.scheme not in ("postgres", "postgresql", "postgis"):
         raise ValueError("Unsupported database type: '%s'" % (url.scheme,))
 
     process = subprocess.Popen(
@@ -42,7 +42,7 @@ def sanitize(url, config):
             # Luckily `pg_dump` supports DB URLs, so we can just pass it the
             # URL as argument to the command.
             "--dbname",
-            url.geturl(),
+            url.geturl().replace('postgis://', 'postgresql://'),
         ),
         stdout=subprocess.PIPE,
     )
