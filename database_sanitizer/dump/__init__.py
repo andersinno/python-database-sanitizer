@@ -11,13 +11,13 @@ SUPPORTED_DATABASE_MODULES = {
     "mysql": "database_sanitizer.dump.mysql",
     "postgres": "database_sanitizer.dump.postgres",
     "postgresql": "database_sanitizer.dump.postgres",
+    "postgis": "database_sanitizer.dump.postgres",
 }
 
 
 # Register supported database schemes.
-urlparse.uses_netloc.append("mysql")
-urlparse.uses_netloc.append("postgres")
-urlparse.uses_netloc.append("postgresql")
+for scheme in SUPPORTED_DATABASE_MODULES.keys():
+    urlparse.uses_netloc.append(scheme)
 
 
 def run(url, output, config):
