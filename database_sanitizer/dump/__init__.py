@@ -6,6 +6,7 @@ import importlib
 
 from six.moves.urllib import parse as urlparse
 
+from .. import session
 
 SUPPORTED_DATABASE_MODULES = {
     "mysql": "database_sanitizer.dump.mysql",
@@ -41,5 +42,6 @@ def run(url, output, config):
     if not db_module_path:
         raise ValueError("Unsupported database scheme: '%s'" % (parsed_url.scheme,))
     db_module = importlib.import_module(db_module_path)
+    session.reset()
     for line in db_module.sanitize(url=parsed_url, config=config):
         output.write(line + "\n")
