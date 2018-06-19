@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import argparse
+import os
 import sys
 
 from .config import Configuration
@@ -43,6 +44,8 @@ def main(args=None):
     config = None
 
     if args.config:
+        conf_dir = os.path.realpath(os.path.dirname(args.config))
+        sys.path.insert(0, conf_dir)
         config = Configuration.from_file(args.config)
     if args.output:
         output = open(args.output, "w")
