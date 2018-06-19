@@ -19,7 +19,6 @@ def main(args=None):
     parser.add_argument(
         "--config",
         "-c",
-        nargs=1,
         type=str,
         dest="config",
         help="Path to the sanitizer configuration file.",
@@ -27,7 +26,6 @@ def main(args=None):
     parser.add_argument(
         "--output",
         "-o",
-        nargs=1,
         type=str,
         dest="output",
         help=(
@@ -45,9 +43,9 @@ def main(args=None):
     config = None
 
     if args.config:
-        config = Configuration.from_file(args.config[0])
+        config = Configuration.from_file(args.config)
     if args.output:
-        output = open(args.output[0], "w")
+        output = open(args.output, "w")
 
     try:
         run(
