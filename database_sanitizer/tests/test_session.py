@@ -1,6 +1,8 @@
 from database_sanitizer import session
 
-session.reset(b'not-so-secret-key')
+
+def setup_module():
+    session.reset(b'not-so-secret-key')
 
 
 def test_hash_text_to_int():
