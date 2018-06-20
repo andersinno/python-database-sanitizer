@@ -6,8 +6,21 @@ from collections import namedtuple
 
 import pytest
 
+from .. import config
 from ..config import Configuration, ConfigurationError
 from ._compat import mock
+
+
+@mock.patch.object(config, 'open')
+@mock.patch('yaml.load')
+def test_from_file(mocked_yaml_load, mocked_open):
+    mocked_yaml_load.return_value = {}
+
+    Configuration.from_file('filename.yml')
+
+    assert mocked_open.call_args == (('filename.yml', 'rb'), {})
+    opened_file = mocked_open.return_value.__enter__.return_value
+    assert mocked_yaml_load.call_args == ((opened_file,), {})
 
 
 def test_load_config_data_must_be_dict():
