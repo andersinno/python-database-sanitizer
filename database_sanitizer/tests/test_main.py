@@ -1,11 +1,10 @@
 from __future__ import unicode_literals
 
+import mock
 import pytest
 import six
 
 from database_sanitizer import __main__
-
-from ._compat import mock
 
 main = __main__.main
 

@@ -1,11 +1,10 @@
 import subprocess
 from io import BytesIO, StringIO
 
+import mock
 import pytest
 
 from database_sanitizer import dump
-
-from ._compat import mock
 
 EXPECTED_POPEN_KWARGS = {
     'mysql://User:Pass@HostName/Db': {

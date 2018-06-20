@@ -2,10 +2,10 @@
 
 from __future__ import unicode_literals
 
+import mock
 import pytest
 
 from ..sanitizers.string import sanitize_empty, sanitize_random, sanitize_zfill
-from ._compat import mock
 
 
 @pytest.mark.parametrize(

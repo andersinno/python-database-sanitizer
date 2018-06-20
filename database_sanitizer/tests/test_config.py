@@ -4,11 +4,11 @@ from __future__ import unicode_literals
 
 from collections import namedtuple
 
+import mock
 import pytest
 
 from .. import config
 from ..config import Configuration, ConfigurationError
-from ._compat import mock
 
 
 @mock.patch.object(config, 'open')
