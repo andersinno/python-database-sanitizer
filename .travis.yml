@@ -4,10 +4,11 @@ cache: pip
 python:
   - "2.7"
   - "3.4"
+  - "3.5"
+  - "3.6"
 install:
   - pip install -r requirements-test.txt
 script:
   - py.test -vvv --cov database_sanitizer --cov-report=term-missing
 after_success:
   - curl -s https://codecov.io/bash | bash
-
