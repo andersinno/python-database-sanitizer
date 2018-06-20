@@ -2,12 +2,11 @@
 
 from __future__ import unicode_literals
 
-import pytest
-
 from collections import namedtuple
 
-from ..config import Configuration, ConfigurationError
+import pytest
 
+from ..config import Configuration, ConfigurationError
 from ._compat import mock
 
 

@@ -12,7 +12,6 @@ from ..utils.mysql import (
     get_mysqldump_args_and_env_from_url,
 )
 
-
 #: Regular expression which matches `INSERT INTO` statements produced by the
 #: `mysqldump` utility, even when extended inserts have been enabled.
 INSERT_INTO_PATTERN = re.compile(

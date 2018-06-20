@@ -8,7 +8,6 @@ import subprocess
 
 from ..utils.postgres import decode_copy_value, encode_copy_value
 
-
 COPY_LINE_PATTERN = re.compile(
     r"^COPY \"(?P<schema>[^\"]*)\".\"(?P<table>[^\"]*)\" "
     r"\((?P<columns>.*)\) "

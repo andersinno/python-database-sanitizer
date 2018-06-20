@@ -3,18 +3,16 @@
 from __future__ import unicode_literals
 
 import io
-import pytest
-
 from collections import namedtuple
+
+import pytest
 from six.moves.urllib import parse as urlparse
 
 from ..config import Configuration
-from ..dump.postgres import parse_column_names, parse_values, sanitize
 from ..dump import postgres as dump_postgres
+from ..dump.postgres import parse_column_names, parse_values, sanitize
 from ..utils.postgres import decode_copy_value
-
 from ._compat import mock
-
 
 MOCK_PG_DUMP_OUTPUT = b"""
 --- Fake PostgreSQL database dump

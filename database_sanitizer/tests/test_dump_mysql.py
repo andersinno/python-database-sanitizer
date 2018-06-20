@@ -3,8 +3,8 @@
 from __future__ import unicode_literals
 
 import io
-import pytest
 
+import pytest
 from six.moves.urllib import parse as urlparse
 
 from ..config import Configuration
@@ -14,7 +14,6 @@ from ..dump.mysql import (
     sanitize,
     sanitize_from_stream,
 )
-
 
 MOCK_MYSQLDUMP_OUTPUT = b"""
 --- Fake MySQL database dump
