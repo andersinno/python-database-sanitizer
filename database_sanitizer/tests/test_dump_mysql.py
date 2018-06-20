@@ -88,7 +88,43 @@ def test_parse_column_names(text, expected_column_names):
         ("('test'),('test')", (("test",), ("test",))),
         ("(1,2),(3,4),", ((1, 2), (3, 4))),
         ("(TRUE),(FALSE),(NULL)", ((True,), (False,), (None,))),
+        ("(x')", ()),  # Invalid data
     ),
 )
 def test_parse_values(text, expected_values):
     assert tuple(parse_values(text)) == expected_values
+
+
+@pytest.mark.parametrize('config_type', [
+    'no-config', 'empty-config', 'single-column-config'])
+@pytest.mark.parametrize('data_label', ['ok', 'invalid'])
+def test_optimizations(config_type, data_label):
+    if config_type == 'no-config':
+        config = None
+        decoder_call_count = 0
+    else:
+        config = Configuration()
+        if config_type == 'empty-config':
+            decoder_call_count = 0
+        else:
+            assert config_type == 'single-column-config'
+            config.sanitizers["test.notes"] = (lambda x: x)
+            decoder_call_count = 3  # Number of rows in test table
+
+    data = {
+        'ok': MOCK_MYSQLDUMP_OUTPUT,
+        'invalid': INVALID_MOCK_MYSQLDUMP_OUTPUT,
+    }[data_label]
+
+    should_raise = (
+        config_type == 'single-column-config'
+        and data_label == 'invalid')
+
+    dump_stream = io.BytesIO(data)
+    if should_raise:
+        with pytest.raises(ValueError):
+            list(sanitize_from_stream(dump_stream, config))
+    else:
+        expected_output = data.decode('utf-8').splitlines()
+        result = list(sanitize_from_stream(dump_stream, config))
+        assert result == expected_output
