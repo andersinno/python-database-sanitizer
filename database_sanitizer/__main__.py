@@ -10,11 +10,9 @@ from .config import Configuration
 from .dump import run
 
 
-def main(args=None):
-    if args is None:
-        args = sys.argv[1:]
-
+def main(argv=sys.argv):
     parser = argparse.ArgumentParser(
+        prog=(argv[0] if len(argv) else "database-sanitizer"),
         description="Sanitizes contents of databases.",
     )
     parser.add_argument(
@@ -30,8 +28,8 @@ def main(args=None):
         type=str,
         dest="output",
         help=(
-            "Path to the file where the sanitized database will be written into. "
-            "If omitted, standard output will be used instead."
+            "Path to the file where the sanitized database will be written "
+            "into. If omitted, standard output will be used instead."
         ),
     )
     parser.add_argument(
@@ -39,7 +37,7 @@ def main(args=None):
         help="Database URL to which to connect into and sanitize contents.",
     )
 
-    args = parser.parse_args(args=args)
+    args = parser.parse_args(args=argv[1:])
     output = sys.stdout
     config = None
 
