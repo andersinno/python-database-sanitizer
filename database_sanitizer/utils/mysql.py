@@ -4,12 +4,8 @@ from __future__ import unicode_literals
 
 import re
 
+import pymysql
 import six
-
-try:
-    import pymysql
-except ImportError:
-    raise RuntimeError("You need to install PyMySQL for MySQL support")
 
 
 def get_mysqldump_args_and_env_from_url(url):
