@@ -34,13 +34,13 @@ def test_load_addon_packages():
     config = Configuration()
 
     config.load_addon_packages({})
-    assert config.addon_packages is None
+    assert config.addon_packages == []
 
     with pytest.raises(ConfigurationError):
         config.load_addon_packages({"config": "test"})
 
     config.load_addon_packages({"config": {}})
-    assert config.addon_packages is None
+    assert config.addon_packages == []
 
     with pytest.raises(ConfigurationError):
         config.load_addon_packages({"config": {"addons": "test"}})
@@ -55,7 +55,7 @@ def test_load_addon_packages():
             "test3",
         ],
     }})
-    assert config.addon_packages == ("test1", "test2", "test3")
+    assert config.addon_packages == ["test1", "test2", "test3"]
 
 
 def test_load_sanitizers():
