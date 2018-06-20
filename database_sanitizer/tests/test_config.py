@@ -8,10 +8,7 @@ from collections import namedtuple
 
 from ..config import Configuration, ConfigurationError
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from ._compat import mock
 
 
 def test_load_config_data_must_be_dict():

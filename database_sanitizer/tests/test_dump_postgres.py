@@ -13,10 +13,7 @@ from ..dump.postgres import parse_column_names, parse_values, sanitize
 from ..dump import postgres as dump_postgres
 from ..utils.postgres import decode_copy_value
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from ._compat import mock
 
 
 MOCK_PG_DUMP_OUTPUT = b"""
