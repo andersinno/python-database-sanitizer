@@ -37,7 +37,7 @@ def test_sanitize_zfill(input_value, expected_output):
 
 @mock.patch('random.choice', return_value='x')
 def test_sanitize_random(mocked_random_choice):
-    assert sanitize_random(None) == None
+    assert sanitize_random(None) is None
     assert sanitize_random('') == ''
     assert sanitize_random('a') == 'x'
     assert sanitize_random('hello') == 'xxxxx'
