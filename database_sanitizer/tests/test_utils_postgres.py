@@ -5,10 +5,10 @@ from __future__ import unicode_literals
 import pytest
 
 from ..utils.postgres import (
-    decode_copy_value,
     DECODE_MAP,
-    encode_copy_value,
     POSTGRES_COPY_NULL_VALUE,
+    decode_copy_value,
+    encode_copy_value,
 )
 
 

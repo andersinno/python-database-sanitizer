@@ -1,8 +1,8 @@
 import datetime
 
-from database_sanitizer.sanitizers import times
+import mock
 
-from ._compat import mock
+from database_sanitizer.sanitizers import times
 
 
 class _FakeDateTime(datetime.datetime):

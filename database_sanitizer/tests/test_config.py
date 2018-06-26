@@ -2,13 +2,25 @@
 
 from __future__ import unicode_literals
 
-import pytest
-
 from collections import namedtuple
 
+import mock
+import pytest
+
+from .. import config
 from ..config import Configuration, ConfigurationError
 
-from ._compat import mock
+
+@mock.patch.object(config, 'open')
+@mock.patch('yaml.load')
+def test_from_file(mocked_yaml_load, mocked_open):
+    mocked_yaml_load.return_value = {}
+
+    Configuration.from_file('filename.yml')
+
+    assert mocked_open.call_args == (('filename.yml', 'rb'), {})
+    opened_file = mocked_open.return_value.__enter__.return_value
+    assert mocked_yaml_load.call_args == ((opened_file,), {})
 
 
 def test_load_config_data_must_be_dict():
@@ -22,13 +34,13 @@ def test_load_addon_packages():
     config = Configuration()
 
     config.load_addon_packages({})
-    assert config.addon_packages is None
+    assert config.addon_packages == []
 
     with pytest.raises(ConfigurationError):
         config.load_addon_packages({"config": "test"})
 
     config.load_addon_packages({"config": {}})
-    assert config.addon_packages is None
+    assert config.addon_packages == []
 
     with pytest.raises(ConfigurationError):
         config.load_addon_packages({"config": {"addons": "test"}})
@@ -43,7 +55,7 @@ def test_load_addon_packages():
             "test3",
         ],
     }})
-    assert config.addon_packages == ("test1", "test2", "test3")
+    assert config.addon_packages == ["test1", "test2", "test3"]
 
 
 def test_load_sanitizers():

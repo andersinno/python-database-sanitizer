@@ -21,7 +21,6 @@ from __future__ import unicode_literals
 
 import itertools
 import re
-import string
 
 import six
 

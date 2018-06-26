@@ -1,4 +1,4 @@
-mock>=2.0.0 ; python_version < '3'
-pytest
+mock>=2.0.0
+pytest>=3.6.2
 pytest-cov
 -e .[MySQL]

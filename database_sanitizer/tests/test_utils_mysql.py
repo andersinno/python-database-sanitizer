@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 
 import pytest
-
 from six.moves.urllib import parse as urlparse
 
 from ..utils.mysql import (

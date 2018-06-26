@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import importlib
+
 import six
 import yaml
 
@@ -22,7 +23,7 @@ class Configuration(object):
     """
     def __init__(self):
         self.sanitizers = {}
-        self.addon_packages = None
+        self.addon_packages = []
 
     @classmethod
     def from_file(cls, filename):
@@ -83,10 +84,8 @@ class Configuration(object):
                 ),
             )
 
-        section_addons = section_config.get("addons")
+        section_addons = section_config.get("addons", [])
         if not isinstance(section_addons, list):
-            if section_addons is None:
-                return
             raise ConfigurationError(
                 "'config.addons' is %s instead of list" % (
                     type(section_addons),
@@ -102,7 +101,7 @@ class Configuration(object):
                     ),
                 )
 
-        self.addon_packages = tuple(section_addons)
+        self.addon_packages = list(section_addons)
 
     def load_sanitizers(self, config_data):
         """
@@ -203,18 +202,17 @@ class Configuration(object):
 
         # Phase 2: Look for the sanitizer under "addon" packages, if any of
         # such have been defined.
-        if self.addon_packages:
-            for addon_package_name in self.addon_packages:
-                module_name = "%s.%s" % (
-                    addon_package_name,
-                    module_name_suffix,
-                )
-                callback = self.find_sanitizer_from_module(
-                    module_name=module_name,
-                    function_name=function_name,
-                )
-                if callback:
-                    return callback
+        for addon_package_name in self.addon_packages:
+            module_name = "%s.%s" % (
+                addon_package_name,
+                module_name_suffix,
+            )
+            callback = self.find_sanitizer_from_module(
+                module_name=module_name,
+                function_name=function_name,
+            )
+            if callback:
+                return callback
 
         # Phase 3: Look from builtin sanitizers.
         module_name = "database_sanitizer.sanitizers.%s" % (module_name_suffix,)
