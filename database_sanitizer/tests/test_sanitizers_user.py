@@ -9,16 +9,16 @@ def setup_module():
 def test_sanitize_email():
     assert user.sanitize_email(None) is None
     assert user.sanitize_email('') == ''
-    assert user.sanitize_email('test@example.com') == (
-        'zoe.burke@xce13103b.sanitized.net')
-    assert user.sanitize_email('test2@example.com') == (
-        'Melanie.Pratt@x4feb7f40.sanitized.net')
-    assert user.sanitize_email('test@example.com') == (
-        'zoe.burke@xce13103b.sanitized.net')
-    assert user.sanitize_email('test3@example.com') == (
-        'irene.archer@x3d2e92ec.sanitized.net')
-    assert user.sanitize_email(' test3@example.com  ') == (
-        'irene.archer@x3d2e92ec.sanitized.net')
+    assert user.sanitize_email('test@example.net') == (
+        'Marian.Little@x12decfd0.san.example.com')
+    assert user.sanitize_email('test2@example.net') == (
+        'Melanie.Pratt@x4feb7f40.san.example.com')
+    assert user.sanitize_email('test@example.net') == (
+        'maureen.graham@x8ed2cb6e.san.example.com')
+    assert user.sanitize_email('test3@example.net') == (
+        'irene.archer@x3d2e92ec.san.example.com')
+    assert user.sanitize_email(' test3@example.net  ') == (
+        'irene.archer@x3d2e92ec.san.example.com')
 
 
 def test_sanitize_username():
@@ -59,9 +59,9 @@ def test_sanitize_surname_en_gb():
 
 
 def test_sanitize_email_resets_on_session_reset():
-    assert user.sanitize_email('test@example.com') == (
-        'zoe.burke@xce13103b.sanitized.net')
+    assert user.sanitize_email('test@example.net') == (
+        'zoe.burke@xce13103b.san.example.com')
     session.reset()
-    assert user.sanitize_email('test@example.com') != (
-        'zoe.burke@xce13103b.sanitized.net')
+    assert user.sanitize_email('test@example.net') != (
+        'zoe.burke@xce13103b.san.example.com')
     session.reset(b'not-so-secret-key')

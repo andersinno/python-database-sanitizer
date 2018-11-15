@@ -12,7 +12,7 @@ def sanitize_email(value):
     given_name = given_names[num1 % given_names_count]
     surname = surnames[num2 % surnames_count]
     case_convert = (text_type.lower if num3 % 8 > 0 else lambda x: x)
-    return '{first}.{last}@x{num:x}.sanitized.net'.format(
+    return '{first}.{last}@x{num:x}.san.example.com'.format(
         first=case_convert(given_name),
         last=case_convert(surname).replace("'", ''),
         num=num3)
