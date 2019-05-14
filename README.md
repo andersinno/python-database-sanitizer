@@ -84,6 +84,16 @@ strategy:
     secret_key: string.empty
 ```
 
+**Note:** In Py2 environments you need to use `!!python/unicode` yaml tag to
+have the sanitizer config values properly converted into `unicode` objects.
+So e.g.:
+
+```YAML
+strategy:
+  user:
+    first_name: !!python/unicode name.first_name
+```
+
 In the example configuration above, there are first listed two "addon
 packages", which are names of Python packages where the sanitizer will
 be looking for sanitizer functions. They are completely optional and can

@@ -50,7 +50,8 @@ def sanitize(url, config):
     current_table = None
     current_table_columns = None
 
-    for line in io.TextIOWrapper(process.stdout, encoding="utf-8"):
+    for line in iter(process.stdout.readline, b""):
+        line = line.decode("utf-8")
         # Eat the trailing new line.
         line = line.rstrip("\n")
 
