@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-import io
+import codecs
 import re
 import subprocess
 
@@ -78,8 +78,7 @@ def sanitize_from_stream(stream, config):
                    of the values stored in the database.
     :type config: database_sanitizer.config.Configuration|None
     """
-    for line in iter(stream.readline, b""):
-        line = line.decode("utf-8")
+    for line in codecs.getreader("utf-8")(stream):
         # Eat the trailing new line.
         line = line.rstrip("\n")
 

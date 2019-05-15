@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-import io
+import codecs
 import re
 import subprocess
 
@@ -50,8 +50,7 @@ def sanitize(url, config):
     current_table = None
     current_table_columns = None
 
-    for line in iter(process.stdout.readline, b""):
-        line = line.decode("utf-8")
+    for line in codecs.getreader("utf-8")(process.stdout):
         # Eat the trailing new line.
         line = line.rstrip("\n")
 
