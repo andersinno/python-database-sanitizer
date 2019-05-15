@@ -93,7 +93,7 @@ class Configuration(object):
             )
 
         for index, module_path in enumerate(section_addons):
-            if not isinstance(module_path, six.text_type):
+            if not isinstance(module_path, str):
                 raise ConfigurationError(
                     "Item %d in 'config.addons' is %s instead of string" % (
                         index,
@@ -137,7 +137,7 @@ class Configuration(object):
                 if sanitizer_name is None:
                     continue
 
-                if not isinstance(sanitizer_name, six.text_type):
+                if not isinstance(sanitizer_name, str):
                     raise ConfigurationError(
                         "'strategy.%s.%s' is %s instead of string" % (
                             table_name,
