@@ -3,8 +3,11 @@
 from __future__ import unicode_literals
 
 import argparse
+import codecs
 import os
 import sys
+
+import six
 
 from .config import Configuration
 from .dump import run
@@ -39,6 +42,8 @@ def main(argv=sys.argv):
 
     args = parser.parse_args(args=argv[1:])
     output = sys.stdout
+    if six.PY2:
+        output = codecs.getwriter("utf-8")(output)
     config = None
 
     if args.config:
