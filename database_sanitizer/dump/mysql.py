@@ -57,8 +57,12 @@ def sanitize(url, config):
 
     args, env = get_mysqldump_args_and_env_from_url(url=url)
 
+    extra_params = []
+    if config:
+        extra_params = config.mysqldump_params
+
     process = subprocess.Popen(
-        args=["mysqldump"] + args,
+        args=["mysqldump"] + args + extra_params,
         env=env,
         stdout=subprocess.PIPE,
     )

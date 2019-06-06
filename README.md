@@ -77,6 +77,11 @@ config:
   addons:
     - some.other.package
     - yet.another.package
+  extra_parameters: # these parameters will be passed to the dump tool CLI
+    mysqldump:
+      - "--single-transaction"
+    pg_dump:
+      - "--exclude-table=something"
 strategy:
   user:
     first_name: name.first_name
@@ -89,6 +94,10 @@ packages", which are names of Python packages where the sanitizer will
 be looking for sanitizer functions. They are completely optional and can
 be omitted, in which case only sanitizer functions defined in package
 called `sanitizers` and built-in sanitizers will be used instead.
+
+It's also possible to define extra parameters to pass to the dump tool (
+`mysqldump` or `pg_dump`), such as the `--single-transaction` flag if you
+want to avoid locking the entire database for the duration of the dump.
 
 The `strategy` portion of the configuration contains the actual
 sanitation rules. First you define name of the database table (in the

@@ -31,6 +31,10 @@ def sanitize(url, config):
     if url.scheme not in ("postgres", "postgresql", "postgis"):
         raise ValueError("Unsupported database type: '%s'" % (url.scheme,))
 
+    extra_params = []
+    if config:
+        extra_params = config.pg_dump_params
+
     process = subprocess.Popen(
         (
             "pg_dump",
@@ -42,7 +46,7 @@ def sanitize(url, config):
             # URL as argument to the command.
             "--dbname",
             url.geturl().replace('postgis://', 'postgresql://'),
-        ),
+         ) + tuple(extra_params),
         stdout=subprocess.PIPE,
     )
 
