@@ -9,6 +9,9 @@ import yaml
 
 __all__ = ("Configuration", "ConfigurationError")
 
+MYSQLDUMP_DEFAULT_PARAMETERS = ["--single-transaction"]
+PG_DUMP_DEFAULT_PARAMETERS = []
+
 
 class ConfigurationError(ValueError):
     """
@@ -77,10 +80,8 @@ class Configuration(object):
         :param config_data: Already parsed configuration data, as dictionary.
         :type config_data: dict[str,any]
         """
-        section_config = config_data.get("config")
+        section_config = config_data.get("config", {})
         if not isinstance(section_config, dict):
-            if section_config is None:
-                return
             raise ConfigurationError(
                 "'config' is %s instead of dict" % (
                     type(section_config),
@@ -95,7 +96,7 @@ class Configuration(object):
                 ),
             )
 
-        mysqldump_params = section_extra_parameters.get("mysqldump", [])
+        mysqldump_params = section_extra_parameters.get("mysqldump", MYSQLDUMP_DEFAULT_PARAMETERS)
         if not isinstance(mysqldump_params, list):
             raise ConfigurationError(
                 "'config.extra_parameters.mysqldump' is %s instead of list" % (
@@ -103,7 +104,7 @@ class Configuration(object):
                 ),
             )
 
-        pg_dump_params = section_extra_parameters.get("pg_dump", [])
+        pg_dump_params = section_extra_parameters.get("pg_dump", PG_DUMP_DEFAULT_PARAMETERS)
         if not isinstance(pg_dump_params, list):
             raise ConfigurationError(
                 "'config.extra_parameters.pg_dump' is %s instead of list" % (

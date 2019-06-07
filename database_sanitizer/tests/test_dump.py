@@ -11,7 +11,9 @@ EXPECTED_POPEN_KWARGS = {
     'mysql://User:Pass@HostName/Db': {
         'args': (
             'mysqldump --complete-insert --extended-insert'
-            ' --net_buffer_length=10240 -h hostname -u User Db').split(),
+            ' --net_buffer_length=10240 -h hostname -u User Db'
+            ' --single-transaction'
+        ).split(),
         'env': {'MYSQL_PWD': 'Pass'},
         'stdout': subprocess.PIPE,
     },
@@ -56,7 +58,7 @@ def test_run_with_mysql_extra_params(mocked_popen):
     config.load({
         "config": {
             "extra_parameters": {
-                "mysqldump": ["--single-transaction"]
+                "mysqldump": ["--double-transaction"]
             }
         }
     })
@@ -67,7 +69,7 @@ def test_run_with_mysql_extra_params(mocked_popen):
         'args': (
             'mysqldump --complete-insert --extended-insert'
             ' --net_buffer_length=10240 -h hostname -u User Db'
-            ' --single-transaction'
+            ' --double-transaction'
         ).split(),
         'env': {'MYSQL_PWD': 'Pass'},
         'stdout': subprocess.PIPE,

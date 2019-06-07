@@ -11,6 +11,7 @@ from ..utils.mysql import (
     encode_mysql_literal,
     get_mysqldump_args_and_env_from_url,
 )
+from ..config import MYSQLDUMP_DEFAULT_PARAMETERS
 
 #: Regular expression which matches `INSERT INTO` statements produced by the
 #: `mysqldump` utility, even when extended inserts have been enabled.
@@ -57,7 +58,7 @@ def sanitize(url, config):
 
     args, env = get_mysqldump_args_and_env_from_url(url=url)
 
-    extra_params = []
+    extra_params = MYSQLDUMP_DEFAULT_PARAMETERS
     if config:
         extra_params = config.mysqldump_params
 

@@ -7,6 +7,7 @@ import re
 import subprocess
 
 from ..utils.postgres import decode_copy_value, encode_copy_value
+from ..config import PG_DUMP_DEFAULT_PARAMETERS
 
 COPY_LINE_PATTERN = re.compile(
     r"^COPY \"(?P<schema>[^\"]*)\".\"(?P<table>[^\"]*)\" "
@@ -31,7 +32,7 @@ def sanitize(url, config):
     if url.scheme not in ("postgres", "postgresql", "postgis"):
         raise ValueError("Unsupported database type: '%s'" % (url.scheme,))
 
-    extra_params = []
+    extra_params = PG_DUMP_DEFAULT_PARAMETERS
     if config:
         extra_params = config.pg_dump_params
 
