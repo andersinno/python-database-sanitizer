@@ -28,6 +28,54 @@ def test_load_config_data_must_be_dict():
         config.load(config_data="test")
 
 
+def test_load_dump_extra_parameters():
+    config = Configuration()
+
+    config.load_dump_extra_parameters({})
+    assert config.mysqldump_params == ["--single-transaction"]
+    assert config.pg_dump_params == []
+
+    with pytest.raises(ConfigurationError):
+        config.load_dump_extra_parameters({"config": "test"})
+
+    config.load_dump_extra_parameters({"config": {}})
+    assert config.mysqldump_params == ["--single-transaction"]
+    assert config.pg_dump_params == []
+
+    with pytest.raises(ConfigurationError):
+        config.load_dump_extra_parameters({"config": {
+            "extra_parameters": "test"
+        }})
+
+    with pytest.raises(ConfigurationError):
+        config.load_dump_extra_parameters({"config": {
+            "extra_parameters": [True]
+        }})
+
+    with pytest.raises(ConfigurationError):
+        config.load_dump_extra_parameters({"config": {
+            "extra_parameters": {
+                "mysqldump": "hernekeitto",
+            },
+        }})
+
+    with pytest.raises(ConfigurationError):
+        config.load_dump_extra_parameters({"config": {
+            "extra_parameters": {
+                "pg_dump": "viina",
+            },
+        }})
+
+    config.load_dump_extra_parameters({"config": {
+        "extra_parameters": {
+            "mysqldump": ["--double-transaction"],
+            "pg_dump": ["--exclude-table=something"],
+        },
+    }})
+    assert config.mysqldump_params == ["--double-transaction"]
+    assert config.pg_dump_params == ["--exclude-table=something"]
+
+
 def test_load_addon_packages():
     config = Configuration()
 

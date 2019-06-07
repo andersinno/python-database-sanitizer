@@ -9,6 +9,9 @@ import yaml
 
 __all__ = ("Configuration", "ConfigurationError")
 
+MYSQLDUMP_DEFAULT_PARAMETERS = ["--single-transaction"]
+PG_DUMP_DEFAULT_PARAMETERS = []
+
 
 class ConfigurationError(ValueError):
     """
@@ -24,6 +27,8 @@ class Configuration(object):
     def __init__(self):
         self.sanitizers = {}
         self.addon_packages = []
+        self.mysqldump_params = []
+        self.pg_dump_params = []
 
     @classmethod
     def from_file(cls, filename):
@@ -64,6 +69,51 @@ class Configuration(object):
 
         self.load_addon_packages(config_data)
         self.load_sanitizers(config_data)
+        self.load_dump_extra_parameters(config_data)
+
+    def load_dump_extra_parameters(self, config_data):
+        """
+        Loads extra parameters for mysqldump and/or pg_dump CLI usage. These
+        parameters should be added to the mysqldump and/or pg_dump command call
+        when taking a dump.
+
+        :param config_data: Already parsed configuration data, as dictionary.
+        :type config_data: dict[str,any]
+        """
+        section_config = config_data.get("config", {})
+        if not isinstance(section_config, dict):
+            raise ConfigurationError(
+                "'config' is %s instead of dict" % (
+                    type(section_config),
+                ),
+            )
+
+        section_extra_parameters = section_config.get("extra_parameters", {})
+        if not isinstance(section_extra_parameters, dict):
+            raise ConfigurationError(
+                "'config.extra_parameters' is %s instead of dict" % (
+                    type(section_extra_parameters),
+                ),
+            )
+
+        mysqldump_params = section_extra_parameters.get("mysqldump", MYSQLDUMP_DEFAULT_PARAMETERS)
+        if not isinstance(mysqldump_params, list):
+            raise ConfigurationError(
+                "'config.extra_parameters.mysqldump' is %s instead of list" % (
+                    type(mysqldump_params),
+                ),
+            )
+
+        pg_dump_params = section_extra_parameters.get("pg_dump", PG_DUMP_DEFAULT_PARAMETERS)
+        if not isinstance(pg_dump_params, list):
+            raise ConfigurationError(
+                "'config.extra_parameters.pg_dump' is %s instead of list" % (
+                    type(pg_dump_params),
+                ),
+            )
+
+        self.mysqldump_params = mysqldump_params
+        self.pg_dump_params = pg_dump_params
 
     def load_addon_packages(self, config_data):
         """
