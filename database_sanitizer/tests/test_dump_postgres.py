@@ -19,6 +19,12 @@ MOCK_PG_DUMP_OUTPUT = b"""
 
 COMMENT ON SCHEMA "public" IS 'standard public schema';
 
+CREATE TABLE "public"."test" (
+"id" integer NOT NULL,
+"created_at" timestamp with time zone NOT NULL,
+"notes" character varying(255) NOT NULL
+);
+
 COPY "public"."test" ("id", "created_at", "notes") FROM stdin;
 1\t2018-01-01 00:00:00\tTest data 1
 2\t2018-01-02 00:00:00\tTest data 2
@@ -63,6 +69,31 @@ def test_sanitize():
     assert "--- Fake PostgreSQL database dump" in dump_output_lines
     assert "--- Final line after `COPY` statement" in dump_output_lines
     assert "2\t2018-01-02 00:00:00\tSanitized" in dump_output_lines
+
+
+def test_skip_table_rows():
+    url = urlparse.urlparse("postgres://localhost/test")
+    config = Configuration()
+    config.skip_rows_for_tables.append('test')
+
+    with mock.patch("subprocess.Popen",
+                    side_effect=create_mock_popen(MOCK_PG_DUMP_OUTPUT)):
+        output = list(sanitize(url, config))
+
+    assert output == [
+        '--- Fake PostgreSQL database dump',
+        '',
+        'COMMENT ON SCHEMA "public" IS \'standard public schema\';',
+        '',
+        'CREATE TABLE "public"."test" (',
+        '"id" integer NOT NULL,',
+        '"created_at" timestamp with time zone NOT NULL,',
+        '"notes" character varying(255) NOT NULL',
+        ');',
+        '',
+        '',
+        '--- Final line after `COPY` statement'
+    ]
 
 
 def test_sanitizer_invalid_input():
