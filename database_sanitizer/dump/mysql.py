@@ -103,6 +103,11 @@ def sanitize_from_stream(stream, config):
         table_name = insert_into_match.group("table")
         column_names = parse_column_names(insert_into_match.group("columns"))
 
+        # Skip `INSERT INTO` statement if table rows are configured
+        # to be skipped.
+        if table_name in config.skip_rows_for_tables:
+            continue
+
         # Collect sanitizers possibly used for this table and place them into
         # a dictionary from which we can look them up by index later.
         sanitizers = {}
