@@ -10,7 +10,7 @@ from ..config import Configuration, ConfigurationError
 
 
 @mock.patch.object(config, 'open')
-@mock.patch('yaml.load')
+@mock.patch('yaml.safe_load')
 def test_from_file(mocked_yaml_load, mocked_open):
     mocked_yaml_load.return_value = {}
 

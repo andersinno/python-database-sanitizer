@@ -46,7 +46,7 @@ class Configuration(object):
         instance = cls()
 
         with open(filename, "rb") as file_stream:
-            config_data = yaml.load(file_stream)
+            config_data = yaml.safe_load(file_stream)
 
         instance.load(config_data)
 
