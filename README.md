@@ -87,6 +87,7 @@ strategy:
     first_name: name.first_name
     last_name: name.last_name
     secret_key: string.empty
+  access_log: skip_rows
 ```
 
 In the example configuration above, there are first listed two "addon
@@ -108,3 +109,9 @@ sanitation function consists from two parts separated from each other by
 a dot: Python module name and name of the actual function, which will
 be prefixed with `sanitize_`, so `name.first_name` would be a function
 called `sanitize_first_name` in a file called `name.py`.
+
+Table content can be left out completely from the sanitized dump by
+setting table strategy to `skip_rows` (check `access_log` table in the
+example config). This will leave out all `INSERT INTO` (MySQL) or `COPY`
+(PostgreSQL) statements from the sanitized dump file. `CREATE TABLE`
+statements will not be removed.

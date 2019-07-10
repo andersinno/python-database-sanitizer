@@ -54,6 +54,7 @@ def sanitize(url, config):
     sanitize_value_line = None
     current_table = None
     current_table_columns = None
+    skip_table = False
 
     for line in codecs.getreader("utf-8")(process.stdout):
         # Eat the trailing new line.
@@ -65,7 +66,12 @@ def sanitize(url, config):
             if line == "\\.":
                 current_table = None
                 current_table_columns = None
-                yield "\\."
+                if not skip_table:
+                    yield "\\."
+                skip_table = False
+                continue
+
+            if skip_table:
                 continue
 
             if not sanitize_value_line:
@@ -83,6 +89,12 @@ def sanitize(url, config):
 
         current_table = copy_line_match.group("table")
         current_table_columns = parse_column_names(copy_line_match.group("columns"))
+
+        # Skip `COPY` statement if table rows are configured
+        # to be skipped.
+        if config and current_table in config.skip_rows_for_tables:
+            skip_table = True
+            continue
 
         sanitize_value_line = get_value_line_sanitizer(
             config, current_table, current_table_columns)

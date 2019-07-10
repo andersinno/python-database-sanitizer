@@ -9,6 +9,7 @@ import yaml
 
 __all__ = ("Configuration", "ConfigurationError")
 
+SKIP_ROWS_CONFIG_VALUE = "skip_rows"
 MYSQLDUMP_DEFAULT_PARAMETERS = ["--single-transaction"]
 PG_DUMP_DEFAULT_PARAMETERS = []
 
@@ -26,6 +27,7 @@ class Configuration(object):
     """
     def __init__(self):
         self.sanitizers = {}
+        self.skip_rows_for_tables = []
         self.addon_packages = []
         self.mysqldump_params = []
         self.pg_dump_params = []
@@ -166,13 +168,18 @@ class Configuration(object):
         if not isinstance(section_strategy, dict):
             if section_strategy is None:
                 return
-            raise ConfigurationError(
-                "'strategy' is %s instead of dict" % (
-                    type(section_strategy),
-                ),
-            )
+            if section_strategy != SKIP_ROWS_CONFIG_VALUE:
+                raise ConfigurationError(
+                    "'strategy' is %s instead of dict" % (
+                        type(section_strategy),
+                    ),
+                )
 
         for table_name, column_data in six.iteritems(section_strategy):
+            if column_data == SKIP_ROWS_CONFIG_VALUE:
+                self.skip_rows_for_tables.append(table_name)
+                continue
+
             if not isinstance(column_data, dict):
                 if column_data is None:
                     continue

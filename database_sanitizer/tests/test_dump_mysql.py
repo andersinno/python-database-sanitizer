@@ -20,6 +20,13 @@ MOCK_MYSQLDUMP_OUTPUT = b"""
 
 DROP TABLE IF EXISTS `test`;
 
+CREATE TABLE `test` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`created_at` date NOT NULL,
+`notes` varchar(255) NOT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT INTO `test` (`id`, `created_at`, `notes`) VALUES \
 (1,'2018-01-01','Test data 1'),\
 (2,'2018-01-02','Test data 2'),\
@@ -59,6 +66,31 @@ def test_sanitize_from_stream():
 (2,'2018-01-02','Sanitized'),\
 (3,'2018-01-03','Sanitized');\
 """ in dump_output_lines
+
+
+def test_skip_table_rows():
+    stream = io.BytesIO(MOCK_MYSQLDUMP_OUTPUT)
+    config = Configuration()
+    config.skip_rows_for_tables.append('test')
+
+    output = list(sanitize_from_stream(stream, config))
+
+    assert output == [
+        '',
+        '--- Fake MySQL database dump',
+        '',
+        'DROP TABLE IF EXISTS `test`;',
+        '',
+        'CREATE TABLE `test` (',
+        '`id` int(11) NOT NULL AUTO_INCREMENT,',
+        '`created_at` date NOT NULL,',
+        '`notes` varchar(255) NOT NULL,',
+        'PRIMARY KEY (`id`)',
+        ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;',
+        '',
+        '',
+        '--- Final line after `INSERT INTO` statement.',
+    ]
 
 
 def test_sanitizer_invalid_input():

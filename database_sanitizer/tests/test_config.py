@@ -137,6 +137,29 @@ def test_load_sanitizers():
     assert "table2.column1" in config.sanitizers
 
 
+def test_table_skip_rows_configuration():
+    config = Configuration()
+
+    with pytest.raises(ConfigurationError):
+        config.load_sanitizers({"strategy": "test"})
+
+    def mock_find_sanitizer(*args):
+        return lambda value: value
+
+    with mock.patch("database_sanitizer.config.Configuration.find_sanitizer",
+                    side_effect=mock_find_sanitizer):
+
+        config.load_sanitizers({"strategy": {
+            "table1": "skip_rows",
+            "table2": {
+                "column1": "test",
+            }
+        }})
+
+    assert "table2.column1" in config.sanitizers
+    assert "table1" in config.skip_rows_for_tables
+
+
 def test_find_sanitizer():
     config = Configuration()
 
