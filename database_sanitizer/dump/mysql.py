@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import codecs
 import re
 import subprocess
+import io
 
 from ..utils.mysql import (
     decode_mysql_literal,
@@ -83,7 +84,7 @@ def sanitize_from_stream(stream, config):
                    of the values stored in the database.
     :type config: database_sanitizer.config.Configuration|None
     """
-    for line in codecs.getreader("utf-8")(stream):
+    for line in io.TextIOWrapper(stream, encoding="utf-8"):
         # Eat the trailing new line.
         line = line.rstrip("\n")
 
