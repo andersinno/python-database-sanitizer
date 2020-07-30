@@ -74,6 +74,7 @@ The configuration file uses following kind of syntax:
 
 ```YAML
 config:
+  charset: iso-8859-1 # defaults to utf-8 if missing, only affects mysqldump
   addons:
     - some.other.package
     - yet.another.package
