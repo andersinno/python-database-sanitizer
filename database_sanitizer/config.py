@@ -12,6 +12,7 @@ __all__ = ("Configuration", "ConfigurationError")
 SKIP_ROWS_CONFIG_VALUE = "skip_rows"
 MYSQLDUMP_DEFAULT_PARAMETERS = ["--single-transaction"]
 PG_DUMP_DEFAULT_PARAMETERS = []
+CHARSET_DEFAULT = "utf-8"
 
 
 class ConfigurationError(ValueError):
@@ -31,6 +32,7 @@ class Configuration(object):
         self.addon_packages = []
         self.mysqldump_params = []
         self.pg_dump_params = []
+        self.charset = ""
 
     @classmethod
     def from_file(cls, filename):
@@ -72,6 +74,16 @@ class Configuration(object):
         self.load_addon_packages(config_data)
         self.load_sanitizers(config_data)
         self.load_dump_extra_parameters(config_data)
+
+        charset = config_data.get("config",{}).get("charset", CHARSET_DEFAULT)
+        if not isinstance(charset, str):
+            raise ConfigurationError(
+                "'config' is %s instead of str" % (
+                    type(charset),
+                ),
+            )
+
+        self.charset = charset
 
     def load_dump_extra_parameters(self, config_data):
         """
