@@ -84,7 +84,7 @@ def sanitize_from_stream(stream, config):
                    of the values stored in the database.
     :type config: database_sanitizer.config.Configuration|None
     """
-    for line in io.TextIOWrapper(stream, encoding="utf-8"):
+    for line in io.TextIOWrapper(stream, encoding=config.charset):
         # Eat the trailing new line.
         line = line.rstrip("\n")
 
