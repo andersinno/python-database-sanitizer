@@ -64,7 +64,7 @@ def get_mysqldump_args_and_env_from_url(url):
 MYSQL_NULL_PATTERN = re.compile(r"^NULL$", re.IGNORECASE)
 MYSQL_BOOLEAN_PATTERN = re.compile(r"^(TRUE|FALSE)$", re.IGNORECASE)
 MYSQL_FLOAT_PATTERN = re.compile(r"^[+-]?\d*\.\d+([eE][+-]?\d+)?$")
-MYSQL_INT_PATTERN = re.compile(r"^\d+$")
+MYSQL_INT_PATTERN = re.compile(r"^[+-]?\d+$")
 MYSQL_STRING_PATTERN = re.compile(r"'(?:[^']|''|\\')*(?<![\\])'")
 
 

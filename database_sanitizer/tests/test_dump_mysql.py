@@ -35,6 +35,26 @@ INSERT INTO `test` (`id`, `created_at`, `notes`) VALUES \
 --- Final line after `INSERT INTO` statement.
 """
 
+MOCK_MYSQLDUMP_OUTPUT_WITH_NEGINT = b"""
+--- Fake MySQL database dump
+
+DROP TABLE IF EXISTS `test`;
+
+CREATE TABLE `test` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`created_at` date NOT NULL,
+`notes` varchar(255) NOT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `test` (`id`, `created_at`, `notes`) VALUES \
+(-1,'2018-01-01','Test data 1'),\
+(2,'2018-01-02','Test data 2'),\
+(3,'2018-01-03','Test data 3');
+
+--- Final line after `INSERT INTO` statement.
+"""
+
 MOCK_MYSQLDUMP_OUTPUT_WITH_U2028 = b"""
 --- Fake MySQL database dump
 
@@ -83,6 +103,20 @@ def test_sanitize_from_stream():
     assert "--- Final line after `INSERT INTO` statement." in dump_output_lines
     assert """INSERT INTO `test` (`id`, `created_at`, `notes`) VALUES \
 (1,'2018-01-01','Sanitized'),\
+(2,'2018-01-02','Sanitized'),\
+(3,'2018-01-03','Sanitized');\
+""" in dump_output_lines
+
+def test_sanitize_with_negint_from_stream():
+    stream = io.BytesIO(MOCK_MYSQLDUMP_OUTPUT_WITH_NEGINT)
+    config = Configuration()
+    config.sanitizers["test.notes"] = lambda value: "Sanitized"
+    dump_output_lines = list(sanitize_from_stream(stream, config))
+
+    assert "--- Fake MySQL database dump" in dump_output_lines
+    assert "--- Final line after `INSERT INTO` statement." in dump_output_lines
+    assert """INSERT INTO `test` (`id`, `created_at`, `notes`) VALUES \
+(-1,'2018-01-01','Sanitized'),\
 (2,'2018-01-02','Sanitized'),\
 (3,'2018-01-03','Sanitized');\
 """ in dump_output_lines
